@@ -19,5 +19,6 @@ if (numberOfToppings < 10) {
 
 //bonus
 
-for(let i = numberOfToppings; <=)
-i+++
+for(let i = 0; i <= numberOfToppings; i++) {
+
+}
