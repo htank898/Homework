@@ -1,0 +1,67 @@
+Write a Definition Statement:
+- I want to build an application that tracks the trades of congresspeople and provides stock recommendations to the user based on trades of representatives throughout the house and senate
+Define your Audience:
+- My audience is young day traders, 22-35 years old who are interested in aggressive investing
+Outline the content of the application:
+- What do I want on each page?
+	- On the landing page I want to showcase the trading performance of the top investors on capitol hill as well as the biggest and most recent trades that have been posted by them
+- What do I want the functionality of each page to be?
+	- For now it just monitoring the trades and performance of congress-peoples stock portfolios
+		- The landing page would be top performers
+		- The second page could be the portfolios of those in the senate
+		- The third page could be those in the house
+		- Perhaps a news page as well that highlights some of the stocks which are being traded at a high volume
+		- It would likely also be wise to put together a page that does a "customer story" of one of the most successful insider trades that a congressperson ever pulled off.
+		- Eventually I would like to create a function that allows you to automate trading to mimic a certain congresspersons portfolio
+- What is the purpose of my application?
+	- This is meant to both shed light on the nefarious trading practices of people in
+	- Fonts:
+		- Helvetica I suppose
+	- Logo (Cannot Store in Markdown file) **to my knowledge**
+
+- Create and provide link to User Story Map in Mural
+	- https://app.mural.co/t/harrisontankersleycapstone1085/m/harrisontankersleycapstone1085/1694148758371/94656eb4b15e9a080d22f0e6541a178018edda79?sender=u3de0cc2dbcec8bc726cb0012
+- Research the following:
+	- List Applications Researched: (links to websites / applications)'
+		- https://www.capitoltrades.com/
+		- https://www.quiverquant.com/sources/senatetrading
+		- https://housestockwatcher.com/
+	- List what you like about each site:
+		- Capitol Trades
+			- Easy UI to navigate
+			- Links news
+			- Very easy to understand Data as presented
+		- QuiverQuant:
+			- Organizes earnings by committee
+			- Presents earning of each fund well
+		- House Stock Watcher
+			- Nothing too impressive about this one
+	- List what you do not like about each site
+		- Capitol Trades
+			- No personal trading insight that I can find
+		- QuiverQuant
+			- Paywall for advanced info
+			- UI is unimpressive
+			- Doesn't give Background on each rep
+	- How my application will be different:
+		- My application will provide a single pane of glass view for both committees and reps/senators themselves
+		- Background for each Representative
+		-
+- Create wireframes and provide link for each page (minimum of 4-5 pages) including Home, About Me, Contact Us and 1-2 other pages demonstrating the specific functionality of your capstone's purpose
+	- https://app.diagrams.net/#G1rug288W0MTrHLtJudOMPg1NyBnt-VTa8
+- Create and provide link to User Flow Diagram
+	- https://miro.com/app/board/uXjVMmOSn8w=/?share_link_id=777087229758
+- Create and provide link to SWOT Analysis
+	- Strengths
+		- Single pane of glass view across Lobbying, Committee, etc
+		- Forecast trading
+	- Weaknesses
+		- Capitol trades already draws all the traffic
+		- I don't understand how quantquiver is tracking performance of each committee
+	- Opportunities
+		- Take this to the next level and create trading bots following portfolio of politicians
+		- Combine the quantitative trading model of QuantQuiver with the Intuitiveness of CapitolTrades
+	- Threats
+		- Don't have training in the security posture to trade and create accounts
+		- Haven't found an API I am sure is as robust and reliable as I'd like
+		-
