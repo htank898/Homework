@@ -1,0 +1,62 @@
+html {
+    background-color: antiquewhite;
+  }
+  
+  body {
+    text-align: center;
+    font-size: 18px;
+  }
+  
+  h1 {
+    font-size: 50px;
+  }
+  
+  img {
+    height: 100%;
+  }
+  
+  div {
+    border: 2px solid burlywood;
+    margin: 10px;
+  }
+  
+  #introPic {
+    float: left;
+  }
+  
+  #bio {
+    float: right;
+  }
+  #bio > li {
+    padding: 2px;
+  }
+  
+  #pro {
+    width: 375px;
+  }
+
+  @media (max-width: 375px) {
+    body {
+        font-size: 16px;
+    }
+
+    h1 {
+        font-size: 40px; 
+    }
+
+    img {
+        max-width: 100%; 
+    }
+
+    div {
+        border: 1px solid rgb(120, 79, 25); 
+        margin: 5px; 
+    }
+
+    #introPic, #bio {
+        float: center;
+    }
+
+    #bio > li {
+        padding: 5px;
+    }
