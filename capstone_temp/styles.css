@@ -1,0 +1,101 @@
+/* Reset margin and padding for the entire page */
+body {
+    margin: 25px;
+    padding: 25px;
+    background-color: #091d26;
+}
+
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    color: #d84f2a;
+}
+
+#trade {
+    font-size: 100px;
+    font-weight: bold;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+}
+
+.study1 {
+    display: flex;
+    justify-content: left; 
+    align-items: left; 
+    min-height: 250px; 
+    margin: 0
+    width: 150px; 
+    height: 200px; 
+    background-color: #094044; 
+    border: 2px solid #333; 
+    padding: 50px; 
+    margin: 20px; 
+    color: #d6c4b0;
+    border-radius: 25px;
+}
+
+
+.study2 {
+    display: flex;
+    justify-content: left; 
+    align-items: left; 
+    min-height: 250px; 
+    margin: 0
+    width: 150px; 
+    height: 200px; 
+    background-color: #094044; 
+    border: 2px solid #333; 
+    padding: 50px; 
+    margin: 20px; 
+    color: #d6c4b0;
+    border-radius: 25px;
+}
+
+.missionStatement {
+    display: flex;
+    justify-content: left; 
+    align-items: left; 
+    min-height: 250px; 
+    margin: 0
+    width: 150px; 
+    height: 200px; 
+    background-color: #094044; 
+    border: 2px solid #333; 
+    padding: 50px; /* Add padding inside the box */
+    margin: 20px;
+    color: #d6c4b0;
+    border-radius: 25px;
+}
+
+header {
+    background-color: #d84f2a;
+    top: 0;
+    left: 0;
+    height: 100px;
+    border-radius: 25px;
+   
+}
+
+.senator {
+    display: flex;
+    width: 500px;
+    height: 100px;
+    background-color: #094044;
+    margin: 5px;
+    float: left;
+    border-radius: 25px;
+}
+
+.break {
+    clear: both;
+}
+
+
+
+#Trade {
+    
+}
