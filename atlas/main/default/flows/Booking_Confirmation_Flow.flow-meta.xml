@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Booking_Confirmation_Flow — Record-Triggered Flow
+     Fires AFTER UPDATE on Rate_Confirmation__c when TMS_Push_Status__c = 'Pending'.
+     Triggers the TMS push via TMSIntegrationService.
+     Also sends email/SMS notification to carrier.
+-->
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>59.0</apiVersion>
+    <description>Sends rate confirmation to carrier via email/SMS and pushes to TMS on booking.</description>
+    <label>Atlas - Booking Confirmation</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value><stringValue>LightningFlowBuilder</stringValue></value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>176</locationX>
+        <locationY>48</locationY>
+        <object>Rate_Confirmation__c</object>
+        <recordTriggerType>Create</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>TMS_Push_Status__c</field>
+            <operator>EqualTo</operator>
+            <value><stringValue>Pending</stringValue></value>
+        </filters>
+        <connector>
+            <targetReference>Push_Confirmation_To_TMS</targetReference>
+        </connector>
+    </start>
+
+    <!-- Push to TMS -->
+    <actionCalls>
+        <name>Push_Confirmation_To_TMS</name>
+        <label>Push to TMS</label>
+        <locationX>176</locationX>
+        <locationY>176</locationY>
+        <actionName>TMSIntegrationService</actionName>
+        <actionType>apex</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>rateConfirmationIds</name>
+            <value><elementReference>$Record.Id</elementReference></value>
+        </inputParameters>
+        <connector>
+            <targetReference>Send_Email_To_Carrier</targetReference>
+        </connector>
+    </actionCalls>
+
+    <!-- Send email to carrier -->
+    <actionCalls>
+        <name>Send_Email_To_Carrier</name>
+        <label>Send Rate Confirmation Email</label>
+        <locationX>176</locationX>
+        <locationY>296</locationY>
+        <actionName>emailSimple</actionName>
+        <actionType>emailSimple</actionType>
+        <inputParameters>
+            <name>emailAddresses</name>
+            <value><elementReference>$Record.Carrier__r.Email__c</elementReference></value>
+        </inputParameters>
+        <inputParameters>
+            <name>emailSubject</name>
+            <value><stringValue>Rate Confirmation — Atlas Freight</stringValue></value>
+        </inputParameters>
+        <inputParameters>
+            <name>emailBody</name>
+            <value><stringValue>Your rate confirmation has been generated. Confirmation Number: {!$Record.Name}. Agreed Rate: {!$Record.Agreed_Rate__c}. Please reply to confirm receipt.</stringValue></value>
+        </inputParameters>
+    </actionCalls>
+
+    <status>Active</status>
+</Flow>

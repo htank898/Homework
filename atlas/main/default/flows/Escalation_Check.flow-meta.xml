@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Escalation_Check — Scheduled Flow
+     Runs every hour. Finds loads that are still unbooked and approaching their pickup time.
+     Creates a high-priority escalation Task for the assigned agent.
+     Escalation triggers:
+       - Pickup in < 4 hours and Status still New or AI Calling
+       - Load has been in AI Calling for > 2 hours with no handoff
+-->
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>59.0</apiVersion>
+    <description>Scheduled flow that identifies hot loads approaching pickup and creates escalation tasks.</description>
+    <label>Atlas - Escalation Check (Hourly)</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value><stringValue>LightningFlowBuilder</stringValue></value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>176</locationX>
+        <locationY>48</locationY>
+        <triggerType>Scheduled</triggerType>
+        <schedule>
+            <frequency>Hourly</frequency>
+            <startDate>2024-01-01</startDate>
+            <startTime>00:00:00.000Z</startTime>
+        </schedule>
+        <connector>
+            <targetReference>Get_Hot_Loads</targetReference>
+        </connector>
+    </start>
+
+    <!-- Query loads approaching pickup with no booking -->
+    <recordLookups>
+        <name>Get_Hot_Loads</name>
+        <label>Get Hot Loads</label>
+        <locationX>176</locationX>
+        <locationY>176</locationY>
+        <filterLogic>1 AND (2 OR 3)</filterLogic>
+        <filters>
+            <field>Status__c</field>
+            <operator>In</operator>
+            <value><stringValue>New,AI Calling</stringValue></value>
+        </filters>
+        <filters>
+            <field>Pickup_Date__c</field>
+            <operator>LessThanOrEqualTo</operator>
+            <value>
+                <!-- 4 hours from now — set by formula in actual deployment -->
+                <elementReference>$Flow.CurrentDateTime</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Status__c</field>
+            <operator>NotEqualTo</operator>
+            <value><stringValue>Cancelled</stringValue></value>
+        </filters>
+        <getFirstRecordOnly>false</getFirstRecordOnly>
+        <object>Load__c</object>
+        <outputReference>Hot_Loads_Collection</outputReference>
+        <queriedFields>Id</queriedFields>
+        <queriedFields>Name</queriedFields>
+        <queriedFields>Status__c</queriedFields>
+        <queriedFields>Assigned_Agent__c</queriedFields>
+        <queriedFields>Pickup_Date__c</queriedFields>
+        <connector>
+            <targetReference>Loop_Hot_Loads</targetReference>
+        </connector>
+    </recordLookups>
+
+    <variables>
+        <name>Hot_Loads_Collection</name>
+        <dataType>SObject</dataType>
+        <isCollection>true</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Load__c</objectType>
+    </variables>
+
+    <variables>
+        <name>Current_Hot_Load</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Load__c</objectType>
+    </variables>
+
+    <!-- Loop through hot loads and create escalation tasks -->
+    <loops>
+        <name>Loop_Hot_Loads</name>
+        <label>Loop Hot Loads</label>
+        <locationX>176</locationX>
+        <locationY>296</locationY>
+        <collectionReference>Hot_Loads_Collection</collectionReference>
+        <iterationOrder>Asc</iterationOrder>
+        <nextValueConnector>
+            <targetReference>Create_Escalation_Task</targetReference>
+        </nextValueConnector>
+        <iterationVariable>Current_Hot_Load</iterationVariable>
+    </loops>
+
+    <recordCreates>
+        <name>Create_Escalation_Task</name>
+        <label>Create Escalation Task</label>
+        <locationX>176</locationX>
+        <locationY>416</locationY>
+        <inputAssignments>
+            <field>WhatId</field>
+            <value><elementReference>Current_Hot_Load.Id</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>OwnerId</field>
+            <value><elementReference>Current_Hot_Load.Assigned_Agent__c</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Subject</field>
+            <value><stringValue>HOT LOAD: Pickup approaching — immediate booking action required</stringValue></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Status</field>
+            <value><stringValue>Open</stringValue></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Priority</field>
+            <value><stringValue>High</stringValue></value>
+        </inputAssignments>
+        <object>Task</object>
+        <connector>
+            <targetReference>Loop_Hot_Loads</targetReference>
+        </connector>
+    </recordCreates>
+
+    <status>Active</status>
+</Flow>

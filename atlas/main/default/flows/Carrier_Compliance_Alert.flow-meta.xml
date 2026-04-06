@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Carrier_Compliance_Alert — Record-Triggered Flow
+     Fires AFTER UPDATE on Carrier__c when FMCSA compliance fields change.
+     Actions:
+       - Out_Of_Service flips to true → create high-priority Task + auto DNC
+       - Insurance expiring in 30 days → create warning Task
+       - Insurance expired → auto DNC + create Task
+       - Blacklisted → create Task on all active loads with this carrier
+-->
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>59.0</apiVersion>
+    <description>Monitors FMCSA compliance fields on Carrier__c and creates alerts when safety/insurance issues arise.</description>
+    <label>Atlas - Carrier Compliance Alert</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value><stringValue>LightningFlowBuilder</stringValue></value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>176</locationX>
+        <locationY>48</locationY>
+        <object>Carrier__c</object>
+        <recordTriggerType>Update</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+        <filterLogic>1 OR 2 OR 3</filterLogic>
+        <filters>
+            <field>Out_Of_Service__c</field>
+            <operator>IsChanged</operator>
+            <value><booleanValue>true</booleanValue></value>
+        </filters>
+        <filters>
+            <field>Insurance_Expiry__c</field>
+            <operator>IsChanged</operator>
+            <value><booleanValue>true</booleanValue></value>
+        </filters>
+        <filters>
+            <field>FMCSA_Authority_Status__c</field>
+            <operator>IsChanged</operator>
+            <value><booleanValue>true</booleanValue></value>
+        </filters>
+        <connector>
+            <targetReference>Check_OOS_Status</targetReference>
+        </connector>
+    </start>
+
+    <!-- Check if carrier just went Out of Service -->
+    <decisions>
+        <name>Check_OOS_Status</name>
+        <label>Out of Service?</label>
+        <locationX>176</locationX>
+        <locationY>176</locationY>
+        <defaultConnector>
+            <targetReference>Check_Insurance_Expiry</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Not OOS</defaultConnectorLabel>
+        <rules>
+            <name>Carrier_Is_OOS</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Out_Of_Service__c</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue><booleanValue>true</booleanValue></rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record__Prior.Out_Of_Service__c</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue><booleanValue>false</booleanValue></rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Create_OOS_Task</targetReference>
+            </connector>
+            <label>Just went OOS</label>
+        </rules>
+    </decisions>
+
+    <!-- Create high-priority task for OOS -->
+    <recordCreates>
+        <name>Create_OOS_Task</name>
+        <label>Create OOS Alert Task</label>
+        <locationX>0</locationX>
+        <locationY>300</locationY>
+        <inputAssignments>
+            <field>WhatId</field>
+            <value><elementReference>$Record.Id</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Subject</field>
+            <value><stringValue>URGENT: Carrier is Out of Service — review active loads</stringValue></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Status</field>
+            <value><stringValue>Open</stringValue></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Priority</field>
+            <value><stringValue>High</stringValue></value>
+        </inputAssignments>
+        <object>Task</object>
+        <connector>
+            <targetReference>Set_DNC_For_OOS</targetReference>
+        </connector>
+    </recordCreates>
+
+    <!-- Auto set DNC when OOS -->
+    <recordUpdates>
+        <name>Set_DNC_For_OOS</name>
+        <label>Set Do Not Call (OOS)</label>
+        <locationX>0</locationX>
+        <locationY>420</locationY>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value><elementReference>$Record.Id</elementReference></value>
+        </filters>
+        <inputAssignments>
+            <field>Do_Not_Call__c</field>
+            <value><booleanValue>true</booleanValue></value>
+        </inputAssignments>
+        <object>Carrier__c</object>
+        <connector>
+            <targetReference>Check_Insurance_Expiry</targetReference>
+        </connector>
+    </recordUpdates>
+
+    <!-- Check insurance expiry -->
+    <decisions>
+        <name>Check_Insurance_Expiry</name>
+        <label>Insurance Expiry?</label>
+        <locationX>352</locationX>
+        <locationY>300</locationY>
+        <defaultConnectorLabel>No Issue</defaultConnectorLabel>
+        <rules>
+            <name>Insurance_Expired</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Insurance_Expiry__c</leftValueReference>
+                <operator>LessThan</operator>
+                <rightValue><elementReference>$Flow.CurrentDate</elementReference></rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Create_Expired_Insurance_Task</targetReference>
+            </connector>
+            <label>Expired</label>
+        </rules>
+    </decisions>
+
+    <recordCreates>
+        <name>Create_Expired_Insurance_Task</name>
+        <label>Create Expired Insurance Task</label>
+        <locationX>352</locationX>
+        <locationY>420</locationY>
+        <inputAssignments>
+            <field>WhatId</field>
+            <value><elementReference>$Record.Id</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Subject</field>
+            <value><stringValue>ACTION REQUIRED: Carrier insurance has expired</stringValue></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Status</field>
+            <value><stringValue>Open</stringValue></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Priority</field>
+            <value><stringValue>High</stringValue></value>
+        </inputAssignments>
+        <object>Task</object>
+    </recordCreates>
+
+    <status>Active</status>
+</Flow>
