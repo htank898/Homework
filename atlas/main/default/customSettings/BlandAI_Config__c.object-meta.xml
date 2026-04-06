@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customSettingsType>Hierarchy</customSettingsType>
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>Configuration settings for Atlas Freight — Bland AI integration, call windows, and rate providers.</description>
+    <enableFeeds>false</enableFeeds>
+    <label>Atlas Bland AI Config</label>
+    <visibility>Public</visibility>
+    <fields>
+        <fullName>Disclosure_Script__c</fullName>
+        <description>Opening disclosure statement used by Bland AI. Must identify the call as automated.</description>
+        <label>Disclosure Script</label>
+        <length>1000</length>
+        <type>LongTextArea</type>
+        <visibleLines>5</visibleLines>
+    </fields>
+    <fields>
+        <fullName>Bland_Pathway_ID__c</fullName>
+        <description>The Bland AI pathway ID for freight outreach calls.</description>
+        <label>Bland Pathway ID</label>
+        <length>255</length>
+        <type>Text</type>
+    </fields>
+    <fields>
+        <fullName>Webhook_URL__c</fullName>
+        <description>The Salesforce REST endpoint URL that Bland AI should POST call results to.</description>
+        <label>Webhook URL</label>
+        <length>500</length>
+        <type>Text</type>
+    </fields>
+    <fields>
+        <fullName>Allow_Saturday_Calls__c</fullName>
+        <defaultValue>false</defaultValue>
+        <description>If true, Bland AI will be allowed to place calls on Saturdays within call hours.</description>
+        <label>Allow Saturday Calls</label>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Rate_API_Provider__c</fullName>
+        <description>Market rate data provider. Supported values: DAT, Truckstop</description>
+        <label>Rate API Provider</label>
+        <length>50</length>
+        <type>Text</type>
+    </fields>
+    <fields>
+        <fullName>Max_Retry_Attempts__c</fullName>
+        <defaultValue>5</defaultValue>
+        <description>Maximum number of times Bland AI will attempt to reach a carrier per load.</description>
+        <label>Max Retry Attempts</label>
+        <precision>3</precision>
+        <scale>0</scale>
+        <type>Number</type>
+    </fields>
+    <fields>
+        <fullName>Escalation_Rate_Threshold__c</fullName>
+        <description>Loads with Target_Rate__c above this amount are automatically escalated to a human broker.</description>
+        <label>Escalation Rate Threshold ($)</label>
+        <precision>10</precision>
+        <scale>2</scale>
+        <type>Currency</type>
+    </fields>
+</CustomObject>
