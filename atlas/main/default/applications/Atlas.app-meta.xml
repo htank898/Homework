@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <defaultLandingTab>Atlas_Loads</defaultLandingTab>
+    <description>Atlas Freight Operations — AI-assisted load booking, carrier intelligence, and compliance tracking.</description>
+    <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
+    <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
+    <isOmniPinnedViewEnabled>false</isOmniPinnedViewEnabled>
+    <label>Atlas</label>
+    <navType>Console</navType>
+    <tabs>Atlas_Loads</tabs>
+    <tabs>Atlas_Carriers</tabs>
+    <tabs>Atlas_Rate_Board</tabs>
+    <tabs>Atlas_Analytics</tabs>
+    <tabs>standard-report</tabs>
+    <tabs>standard-dashboard</tabs>
+    <uiType>Lightning</uiType>
+    <utilityBar>
+        <utilityBarItems>
+            <name>OpenCTI_Softphone</name>
+            <itemComponents>
+                <componentName>runtime_omnistudio/omniOpenCTI</componentName>
+            </itemComponents>
+            <label>Calls</label>
+            <minimized>true</minimized>
+        </utilityBarItems>
+    </utilityBar>
+</CustomApplication>

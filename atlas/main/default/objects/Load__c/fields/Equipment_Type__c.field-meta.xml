@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Equipment_Type__c</fullName>
+    <label>Equipment Type</label>
+    <required>true</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>true</sorted>
+            <value>
+                <fullName>Dry Van</fullName>
+                <default>true</default>
+                <label>Dry Van</label>
+            </value>
+            <value>
+                <fullName>Refrigerated (Reefer)</fullName>
+                <default>false</default>
+                <label>Refrigerated (Reefer)</label>
+            </value>
+            <value>
+                <fullName>Flatbed</fullName>
+                <default>false</default>
+                <label>Flatbed</label>
+            </value>
+            <value>
+                <fullName>Step Deck</fullName>
+                <default>false</default>
+                <label>Step Deck</label>
+            </value>
+            <value>
+                <fullName>Lowboy</fullName>
+                <default>false</default>
+                <label>Lowboy</label>
+            </value>
+            <value>
+                <fullName>Tanker</fullName>
+                <default>false</default>
+                <label>Tanker</label>
+            </value>
+            <value>
+                <fullName>Box Truck</fullName>
+                <default>false</default>
+                <label>Box Truck</label>
+            </value>
+            <value>
+                <fullName>Hotshot</fullName>
+                <default>false</default>
+                <label>Hotshot</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,19 @@
+{
+  "packageDirectories": [
+    {
+      "path": "atlas",
+      "default": true,
+      "package": "Atlas",
+      "versionName": "Version 1.0",
+      "versionNumber": "1.0.0.NEXT"
+    }
+  ],
+  "namespace": "",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "59.0",
+  "plugins": {
+    "force": {
+      "defaultusername": ""
+    }
+  }
+}

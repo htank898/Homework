@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customObject>Carrier__c</customObject>
+    <label>Carriers</label>
+    <motif>Custom87: People</motif>
+</CustomTab>

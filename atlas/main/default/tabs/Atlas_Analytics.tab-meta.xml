@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customObject>Call_Log__c</customObject>
+    <label>Call Analytics</label>
+    <motif>Custom96: Chart</motif>
+</CustomTab>

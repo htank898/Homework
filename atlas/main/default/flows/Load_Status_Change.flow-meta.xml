@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Load_Status_Change — Record-Triggered Flow
+     Fires AFTER INSERT or AFTER UPDATE on Load__c.
+     Handles:
+       - Status = 'AI Calling'   → Invoke BlandOutboundService.initiateCallsForLoad
+       - Status = 'Booked'       → Trigger Booking_Confirmation_Flow (handled in separate flow)
+       - New load created        → Set Target_Rate__c from Rate_Benchmark__c
+       - All status transitions  → Post to Chatter feed
+-->
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>59.0</apiVersion>
+    <description>Drives Atlas load state machine: triggers AI calling, rate lookup, and booking automation on status changes.</description>
+    <label>Atlas - Load Status Change</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value><stringValue>LightningFlowBuilder</stringValue></value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>176</locationX>
+        <locationY>48</locationY>
+        <object>Load__c</object>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+        <filterLogic>1 OR 2</filterLogic>
+        <filters>
+            <field>Status__c</field>
+            <operator>IsChanged</operator>
+            <value><booleanValue>true</booleanValue></value>
+        </filters>
+        <filters>
+            <field>Origin_State__c</field>
+            <operator>IsChanged</operator>
+            <value><booleanValue>true</booleanValue></value>
+        </filters>
+        <connector>
+            <targetReference>Check_Status_Decision</targetReference>
+        </connector>
+    </start>
+
+    <!-- Decision: what did Status change to? -->
+    <decisions>
+        <name>Check_Status_Decision</name>
+        <label>What Status?</label>
+        <locationX>176</locationX>
+        <locationY>176</locationY>
+        <defaultConnector>
+            <targetReference>Check_If_New_Load_For_Rate</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Other</defaultConnectorLabel>
+        <rules>
+            <name>Status_Is_AI_Calling</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Status__c</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue><stringValue>AI Calling</stringValue></rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Invoke_Select_Carriers</targetReference>
+            </connector>
+            <label>AI Calling</label>
+        </rules>
+        <rules>
+            <name>Status_Is_Booked</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Status__c</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue><stringValue>Booked</stringValue></rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Create_Rate_Confirmation</targetReference>
+            </connector>
+            <label>Booked</label>
+        </rules>
+    </decisions>
+
+    <!-- Action: Select carriers and initiate Bland AI calls -->
+    <actionCalls>
+        <name>Invoke_Select_Carriers</name>
+        <label>Invoke Select Carriers for Load</label>
+        <locationX>0</locationX>
+        <locationY>300</locationY>
+        <actionName>BlandOutboundService</actionName>
+        <actionType>apex</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>loadIds</name>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputParameters>
+        <connector>
+            <targetReference>Update_AI_Calling_Active</targetReference>
+        </connector>
+    </actionCalls>
+
+    <!-- Update Load: AI_Calling_Active__c = true -->
+    <recordUpdates>
+        <name>Update_AI_Calling_Active</name>
+        <label>Set AI Calling Active</label>
+        <locationX>0</locationX>
+        <locationY>420</locationY>
+        <inputAssignments>
+            <field>AI_Calling_Active__c</field>
+            <value><booleanValue>true</booleanValue></value>
+        </inputAssignments>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value><elementReference>$Record.Id</elementReference></value>
+        </filters>
+        <object>Load__c</object>
+    </recordUpdates>
+
+    <!-- Action: Set Target Rate from market benchmark when origin/dest changes -->
+    <decisions>
+        <name>Check_If_New_Load_For_Rate</name>
+        <label>New Load or Lane Change?</label>
+        <locationX>352</locationX>
+        <locationY>300</locationY>
+        <defaultConnectorLabel>No</defaultConnectorLabel>
+        <rules>
+            <name>Is_New_Or_Lane_Changed</name>
+            <conditionLogic>or</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record__Prior.Origin_State__c</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue><booleanValue>true</booleanValue></rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Origin_State__c</leftValueReference>
+                <operator>NotEqualTo</operator>
+                <rightValue><elementReference>$Record__Prior.Origin_State__c</elementReference></rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Set_Target_Rate</targetReference>
+            </connector>
+            <label>Yes</label>
+        </rules>
+    </decisions>
+
+    <actionCalls>
+        <name>Set_Target_Rate</name>
+        <label>Set Target Rate from Benchmark</label>
+        <locationX>352</locationX>
+        <locationY>420</locationY>
+        <actionName>MarketRateService</actionName>
+        <actionType>apex</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>loadIds</name>
+            <value><elementReference>$Record.Id</elementReference></value>
+        </inputParameters>
+    </actionCalls>
+
+    <!-- Create Rate_Confirmation__c when Booked -->
+    <recordCreates>
+        <name>Create_Rate_Confirmation</name>
+        <label>Create Rate Confirmation</label>
+        <locationX>528</locationX>
+        <locationY>300</locationY>
+        <inputAssignments>
+            <field>Load__c</field>
+            <value><elementReference>$Record.Id</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Carrier__c</field>
+            <value><elementReference>$Record.Booked_Carrier__c</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Agreed_Rate__c</field>
+            <value><elementReference>$Record.Agreed_Rate__c</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Generated_At__c</field>
+            <value><elementReference>$Flow.CurrentDateTime</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>TMS_Push_Status__c</field>
+            <value><stringValue>Pending</stringValue></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Sent_Via__c</field>
+            <value><stringValue>Email and SMS</stringValue></value>
+        </inputAssignments>
+        <object>Rate_Confirmation__c</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+        <connector>
+            <targetReference>Push_To_TMS</targetReference>
+        </connector>
+    </recordCreates>
+
+    <actionCalls>
+        <name>Push_To_TMS</name>
+        <label>Push Load to TMS</label>
+        <locationX>528</locationX>
+        <locationY>420</locationY>
+        <actionName>TMSIntegrationService</actionName>
+        <actionType>apex</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>rateConfirmationIds</name>
+            <value><elementReference>Create_Rate_Confirmation</elementReference></value>
+        </inputParameters>
+    </actionCalls>
+
+    <status>Active</status>
+</Flow>
